@@ -53,32 +53,12 @@ func (s *webChatMessageStoreService) SaveMessage(ctx context.Context, input *pro
 	}
 
 	if input.SenderType == proto.SenderType_CONTACT {
-		contact, err := s.customerOSService.GetContactByEmail(*input.Email)
+
+		contactId, err := s.getContactIdWithEmailOrCreate(tenant, *input.Email)
 		if err != nil {
-			contactId, err = s.customerOSService.CreateContactWithEmail(tenant, *input.Email)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			contactId = contact.Id
+			return nil, err
 		}
 		participantId = contactId
-
-		if conversationId == "" {
-			convId, err := s.customerOSService.GetWebChatConversationIdWithContactInitiator(tenant, contactId)
-			if err != nil {
-				return nil, err
-			}
-			if convId != "" {
-				conversationId = convId
-			} else {
-				convId, err = s.customerOSService.CreateConversation(tenant, participantId, convertSenderTypeToConversationSenderType(input.SenderType), entity.WEB_CHAT)
-				if err != nil {
-					return nil, err
-				}
-				conversationId = convId
-			}
-		}
 	} else if input.SenderType == proto.SenderType_USER {
 		user, err := s.customerOSService.GetUserByEmail(*input.Email)
 		if err != nil {
@@ -87,22 +67,14 @@ func (s *webChatMessageStoreService) SaveMessage(ctx context.Context, input *pro
 			userId = user.Id
 		}
 		participantId = userId
+	}
 
-		if conversationId == "" {
-			convId, err := s.customerOSService.GetWebChatConversationIdWithContactInitiator(tenant, userId)
-			if err != nil {
-				return nil, err
-			}
-			if convId != "" {
-				conversationId = convId
-			} else {
-				convId, err = s.customerOSService.CreateConversation(tenant, userId, convertSenderTypeToConversationSenderType(input.SenderType), entity.WEB_CHAT)
-				if err != nil {
-					return nil, err
-				}
-				conversationId = convId
-			}
+	if conversationId == "" {
+		convId, err := s.getActiveConversationOrCreate(tenant, participantId, input.SenderType)
+		if err != nil {
+			return nil, err
 		}
+		conversationId = convId
 	}
 
 	_, err := s.customerOSService.UpdateConversation(tenant, conversationId, participantId, convertSenderTypeToConversationSenderType(input.SenderType))
@@ -142,6 +114,51 @@ func (s *webChatMessageStoreService) SaveMessage(ctx context.Context, input *pro
 		Time:           timestamppb.New(time.Now()),
 	}
 	return mi, nil
+}
+
+func (s *webChatMessageStoreService) getContactIdWithEmailOrCreate(tenant string, email string) (string, error) {
+	contact, err := s.customerOSService.GetContactByEmail(email)
+	if err != nil {
+		contactId, err := s.customerOSService.CreateContactWithEmail(tenant, email)
+		if err != nil {
+			return "", err
+		}
+		return contactId, nil
+	} else {
+		return contact.Id, nil
+	}
+}
+
+func (s *webChatMessageStoreService) getActiveConversationOrCreate(tenant string, participantId string, senderType proto.SenderType) (string, error) {
+	var conversationId string
+
+	if senderType == proto.SenderType_CONTACT {
+		convId, err := s.customerOSService.GetWebChatConversationIdWithContactInitiator(tenant, participantId)
+		if err != nil {
+			return "", err
+		}
+		if convId != "" {
+			conversationId = convId
+		}
+	} else if senderType == proto.SenderType_USER {
+		convId, err := s.customerOSService.GetWebChatConversationIdWithUserInitiator(tenant, participantId)
+		if err != nil {
+			return "", err
+		}
+		if convId != "" {
+			conversationId = convId
+		}
+	}
+
+	if conversationId == "" {
+		convId, err := s.customerOSService.CreateConversation(tenant, participantId, convertSenderTypeToConversationSenderType(senderType), entity.WEB_CHAT)
+		if err != nil {
+			return "", err
+		}
+		conversationId = convId
+	}
+
+	return conversationId, nil
 }
 
 func convertSenderTypeToConversationSenderType(senderType proto.SenderType) entity.SenderType {
