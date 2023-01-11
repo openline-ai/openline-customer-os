@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.28.1
 // 	protoc        v3.21.9
-// source: messagestore.proto
+// source: MessageStore.proto
 
 package proto
 
@@ -54,11 +54,11 @@ func (x FeedItemState) String() string {
 }
 
 func (FeedItemState) Descriptor() protoreflect.EnumDescriptor {
-	return file_messagestore_proto_enumTypes[0].Descriptor()
+	return file_MessageStore_proto_enumTypes[0].Descriptor()
 }
 
 func (FeedItemState) Type() protoreflect.EnumType {
-	return &file_messagestore_proto_enumTypes[0]
+	return &file_MessageStore_proto_enumTypes[0]
 }
 
 func (x FeedItemState) Number() protoreflect.EnumNumber {
@@ -67,7 +67,7 @@ func (x FeedItemState) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use FeedItemState.Descriptor instead.
 func (FeedItemState) EnumDescriptor() ([]byte, []int) {
-	return file_messagestore_proto_rawDescGZIP(), []int{0}
+	return file_MessageStore_proto_rawDescGZIP(), []int{0}
 }
 
 type MessagePagedResponse struct {
@@ -83,7 +83,7 @@ type MessagePagedResponse struct {
 func (x *MessagePagedResponse) Reset() {
 	*x = MessagePagedResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_messagestore_proto_msgTypes[0]
+		mi := &file_MessageStore_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -96,7 +96,7 @@ func (x *MessagePagedResponse) String() string {
 func (*MessagePagedResponse) ProtoMessage() {}
 
 func (x *MessagePagedResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_messagestore_proto_msgTypes[0]
+	mi := &file_MessageStore_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -109,7 +109,7 @@ func (x *MessagePagedResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MessagePagedResponse.ProtoReflect.Descriptor instead.
 func (*MessagePagedResponse) Descriptor() ([]byte, []int) {
-	return file_messagestore_proto_rawDescGZIP(), []int{0}
+	return file_MessageStore_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *MessagePagedResponse) GetMessage() []*Message {
@@ -153,7 +153,7 @@ type FeedItem struct {
 func (x *FeedItem) Reset() {
 	*x = FeedItem{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_messagestore_proto_msgTypes[1]
+		mi := &file_MessageStore_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -166,7 +166,7 @@ func (x *FeedItem) String() string {
 func (*FeedItem) ProtoMessage() {}
 
 func (x *FeedItem) ProtoReflect() protoreflect.Message {
-	mi := &file_messagestore_proto_msgTypes[1]
+	mi := &file_MessageStore_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -179,7 +179,7 @@ func (x *FeedItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FeedItem.ProtoReflect.Descriptor instead.
 func (*FeedItem) Descriptor() ([]byte, []int) {
-	return file_messagestore_proto_rawDescGZIP(), []int{1}
+	return file_MessageStore_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *FeedItem) GetId() int64 {
@@ -264,7 +264,7 @@ type FeedItemPagedResponse struct {
 func (x *FeedItemPagedResponse) Reset() {
 	*x = FeedItemPagedResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_messagestore_proto_msgTypes[2]
+		mi := &file_MessageStore_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -277,7 +277,7 @@ func (x *FeedItemPagedResponse) String() string {
 func (*FeedItemPagedResponse) ProtoMessage() {}
 
 func (x *FeedItemPagedResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_messagestore_proto_msgTypes[2]
+	mi := &file_MessageStore_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -290,7 +290,7 @@ func (x *FeedItemPagedResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FeedItemPagedResponse.ProtoReflect.Descriptor instead.
 func (*FeedItemPagedResponse) Descriptor() ([]byte, []int) {
-	return file_messagestore_proto_rawDescGZIP(), []int{2}
+	return file_MessageStore_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *FeedItemPagedResponse) GetFeedItems() []*FeedItem {
@@ -318,7 +318,7 @@ type Id struct {
 func (x *Id) Reset() {
 	*x = Id{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_messagestore_proto_msgTypes[3]
+		mi := &file_MessageStore_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -331,7 +331,7 @@ func (x *Id) String() string {
 func (*Id) ProtoMessage() {}
 
 func (x *Id) ProtoReflect() protoreflect.Message {
-	mi := &file_messagestore_proto_msgTypes[3]
+	mi := &file_MessageStore_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -344,7 +344,7 @@ func (x *Id) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Id.ProtoReflect.Descriptor instead.
 func (*Id) Descriptor() ([]byte, []int) {
-	return file_messagestore_proto_rawDescGZIP(), []int{3}
+	return file_MessageStore_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Id) GetId() int64 {
@@ -367,7 +367,7 @@ type GetMessagesRequest struct {
 func (x *GetMessagesRequest) Reset() {
 	*x = GetMessagesRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_messagestore_proto_msgTypes[4]
+		mi := &file_MessageStore_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -380,7 +380,7 @@ func (x *GetMessagesRequest) String() string {
 func (*GetMessagesRequest) ProtoMessage() {}
 
 func (x *GetMessagesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_messagestore_proto_msgTypes[4]
+	mi := &file_MessageStore_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -393,7 +393,7 @@ func (x *GetMessagesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMessagesRequest.ProtoReflect.Descriptor instead.
 func (*GetMessagesRequest) Descriptor() ([]byte, []int) {
-	return file_messagestore_proto_rawDescGZIP(), []int{4}
+	return file_MessageStore_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GetMessagesRequest) GetConversationId() int64 {
@@ -430,7 +430,7 @@ type GetFeedsPagedRequest struct {
 func (x *GetFeedsPagedRequest) Reset() {
 	*x = GetFeedsPagedRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_messagestore_proto_msgTypes[5]
+		mi := &file_MessageStore_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -443,7 +443,7 @@ func (x *GetFeedsPagedRequest) String() string {
 func (*GetFeedsPagedRequest) ProtoMessage() {}
 
 func (x *GetFeedsPagedRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_messagestore_proto_msgTypes[5]
+	mi := &file_MessageStore_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -456,7 +456,7 @@ func (x *GetFeedsPagedRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFeedsPagedRequest.ProtoReflect.Descriptor instead.
 func (*GetFeedsPagedRequest) Descriptor() ([]byte, []int) {
-	return file_messagestore_proto_rawDescGZIP(), []int{5}
+	return file_MessageStore_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *GetFeedsPagedRequest) GetStateIn() []FeedItemState {
@@ -480,10 +480,10 @@ func (x *GetFeedsPagedRequest) GetPageSize() int32 {
 	return 0
 }
 
-var File_messagestore_proto protoreflect.FileDescriptor
+var File_MessageStore_proto protoreflect.FileDescriptor
 
-var file_messagestore_proto_rawDesc = []byte{
-	0x0a, 0x12, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x74, 0x6f, 0x72, 0x65, 0x2e, 0x70,
+var file_MessageStore_proto_rawDesc = []byte{
+	0x0a, 0x12, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x53, 0x74, 0x6f, 0x72, 0x65, 0x2e, 0x70,
 	0x72, 0x6f, 0x74, 0x6f, 0x12, 0x05, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x1f, 0x67, 0x6f, 0x6f,
 	0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x74, 0x69, 0x6d,
 	0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x0d, 0x4d, 0x65,
@@ -571,30 +571,30 @@ var file_messagestore_proto_rawDesc = []byte{
 	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x27, 0x0a, 0x07, 0x67, 0x65,
 	0x74, 0x46, 0x65, 0x65, 0x64, 0x12, 0x09, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x49, 0x64,
 	0x1a, 0x0f, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x46, 0x65, 0x65, 0x64, 0x49, 0x74, 0x65,
-	0x6d, 0x22, 0x00, 0x42, 0x56, 0x5a, 0x54, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
+	0x6d, 0x22, 0x00, 0x42, 0x5c, 0x5a, 0x5a, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
 	0x6d, 0x2f, 0x6f, 0x70, 0x65, 0x6e, 0x6c, 0x69, 0x6e, 0x65, 0x2d, 0x61, 0x69, 0x2f, 0x6f, 0x70,
 	0x65, 0x6e, 0x6c, 0x69, 0x6e, 0x65, 0x2d, 0x63, 0x75, 0x73, 0x74, 0x6f, 0x6d, 0x65, 0x72, 0x2d,
 	0x6f, 0x73, 0x2f, 0x70, 0x61, 0x63, 0x6b, 0x61, 0x67, 0x65, 0x73, 0x2f, 0x73, 0x65, 0x72, 0x76,
 	0x65, 0x72, 0x2f, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x2d, 0x73, 0x74, 0x6f, 0x72, 0x65,
-	0x2f, 0x67, 0x65, 0x6e, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x62, 0x06, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x33,
+	0x2f, 0x67, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x65, 0x64, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x2f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
-	file_messagestore_proto_rawDescOnce sync.Once
-	file_messagestore_proto_rawDescData = file_messagestore_proto_rawDesc
+	file_MessageStore_proto_rawDescOnce sync.Once
+	file_MessageStore_proto_rawDescData = file_MessageStore_proto_rawDesc
 )
 
-func file_messagestore_proto_rawDescGZIP() []byte {
-	file_messagestore_proto_rawDescOnce.Do(func() {
-		file_messagestore_proto_rawDescData = protoimpl.X.CompressGZIP(file_messagestore_proto_rawDescData)
+func file_MessageStore_proto_rawDescGZIP() []byte {
+	file_MessageStore_proto_rawDescOnce.Do(func() {
+		file_MessageStore_proto_rawDescData = protoimpl.X.CompressGZIP(file_MessageStore_proto_rawDescData)
 	})
-	return file_messagestore_proto_rawDescData
+	return file_MessageStore_proto_rawDescData
 }
 
-var file_messagestore_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_messagestore_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
-var file_messagestore_proto_goTypes = []interface{}{
+var file_MessageStore_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_MessageStore_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_MessageStore_proto_goTypes = []interface{}{
 	(FeedItemState)(0),            // 0: proto.FeedItemState
 	(*MessagePagedResponse)(nil),  // 1: proto.MessagePagedResponse
 	(*FeedItem)(nil),              // 2: proto.FeedItem
@@ -606,7 +606,7 @@ var file_messagestore_proto_goTypes = []interface{}{
 	(*timestamppb.Timestamp)(nil), // 8: google.protobuf.Timestamp
 	(SenderType)(0),               // 9: proto.SenderType
 }
-var file_messagestore_proto_depIdxs = []int32{
+var file_MessageStore_proto_depIdxs = []int32{
 	7,  // 0: proto.MessagePagedResponse.message:type_name -> proto.Message
 	8,  // 1: proto.MessagePagedResponse.before:type_name -> google.protobuf.Timestamp
 	0,  // 2: proto.FeedItem.state:type_name -> proto.FeedItemState
@@ -632,14 +632,14 @@ var file_messagestore_proto_depIdxs = []int32{
 	0,  // [0:8] is the sub-list for field type_name
 }
 
-func init() { file_messagestore_proto_init() }
-func file_messagestore_proto_init() {
-	if File_messagestore_proto != nil {
+func init() { file_MessageStore_proto_init() }
+func file_MessageStore_proto_init() {
+	if File_MessageStore_proto != nil {
 		return
 	}
 	file_Message_proto_init()
 	if !protoimpl.UnsafeEnabled {
-		file_messagestore_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_MessageStore_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*MessagePagedResponse); i {
 			case 0:
 				return &v.state
@@ -651,7 +651,7 @@ func file_messagestore_proto_init() {
 				return nil
 			}
 		}
-		file_messagestore_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_MessageStore_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*FeedItem); i {
 			case 0:
 				return &v.state
@@ -663,7 +663,7 @@ func file_messagestore_proto_init() {
 				return nil
 			}
 		}
-		file_messagestore_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+		file_MessageStore_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*FeedItemPagedResponse); i {
 			case 0:
 				return &v.state
@@ -675,7 +675,7 @@ func file_messagestore_proto_init() {
 				return nil
 			}
 		}
-		file_messagestore_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+		file_MessageStore_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Id); i {
 			case 0:
 				return &v.state
@@ -687,7 +687,7 @@ func file_messagestore_proto_init() {
 				return nil
 			}
 		}
-		file_messagestore_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+		file_MessageStore_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetMessagesRequest); i {
 			case 0:
 				return &v.state
@@ -699,7 +699,7 @@ func file_messagestore_proto_init() {
 				return nil
 			}
 		}
-		file_messagestore_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+		file_MessageStore_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetFeedsPagedRequest); i {
 			case 0:
 				return &v.state
@@ -712,25 +712,25 @@ func file_messagestore_proto_init() {
 			}
 		}
 	}
-	file_messagestore_proto_msgTypes[0].OneofWrappers = []interface{}{}
-	file_messagestore_proto_msgTypes[4].OneofWrappers = []interface{}{}
+	file_MessageStore_proto_msgTypes[0].OneofWrappers = []interface{}{}
+	file_MessageStore_proto_msgTypes[4].OneofWrappers = []interface{}{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: file_messagestore_proto_rawDesc,
+			RawDescriptor: file_MessageStore_proto_rawDesc,
 			NumEnums:      1,
 			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_messagestore_proto_goTypes,
-		DependencyIndexes: file_messagestore_proto_depIdxs,
-		EnumInfos:         file_messagestore_proto_enumTypes,
-		MessageInfos:      file_messagestore_proto_msgTypes,
+		GoTypes:           file_MessageStore_proto_goTypes,
+		DependencyIndexes: file_MessageStore_proto_depIdxs,
+		EnumInfos:         file_MessageStore_proto_enumTypes,
+		MessageInfos:      file_MessageStore_proto_msgTypes,
 	}.Build()
-	File_messagestore_proto = out.File
-	file_messagestore_proto_rawDesc = nil
-	file_messagestore_proto_goTypes = nil
-	file_messagestore_proto_depIdxs = nil
+	File_MessageStore_proto = out.File
+	file_MessageStore_proto_rawDesc = nil
+	file_MessageStore_proto_goTypes = nil
+	file_MessageStore_proto_depIdxs = nil
 }

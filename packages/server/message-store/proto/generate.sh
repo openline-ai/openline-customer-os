@@ -1,5 +1,5 @@
 #!/bin/bash
 
-mkdir -p ../gen/proto
-protoc --go_out=../gen/proto --go_opt=paths=source_relative --go-grpc_out=../gen/proto --go-grpc_opt=paths=source_relative ./*.proto
-sed -i "" -e "s/,omitempty//g" ../gen/proto/*.go
+mkdir -p ../generated/proto
+protoc --go_out=../generated/proto --go_opt=paths=source_relative --go-grpc_out=../generated/proto --go-grpc_opt=paths=source_relative ./*.proto
+sed -i "" -e "s/,omitempty//g" ../generated/proto/*.go

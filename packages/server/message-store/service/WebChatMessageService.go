@@ -3,8 +3,7 @@ package service
 import (
 	"context"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
-	"github.com/openline-ai/openline-customer-os/packages/server/message-store/gen/proto"
-	pb "github.com/openline-ai/openline-customer-os/packages/server/message-store/gen/proto"
+	"github.com/openline-ai/openline-customer-os/packages/server/message-store/generated/proto"
 	"github.com/openline-ai/openline-customer-os/packages/server/message-store/repository"
 	"github.com/openline-ai/openline-customer-os/packages/server/message-store/repository/entity"
 	"time"
@@ -22,7 +21,7 @@ type webChatMessageStoreService struct {
 
 // sender == contact -> find conversation by initiator = contact and channel = webchat
 // sender == user -> find conversation by id
-func (s *webChatMessageStoreService) SaveMessage(ctx context.Context, input *pb.WebChatInputMessage) (*pb.Message, error) {
+func (s *webChatMessageStoreService) SaveMessage(ctx context.Context, input *proto.WebChatInputMessage) (*proto.Message, error) {
 	//var err error
 	//var conversation *gen.Conversation
 	//
@@ -37,7 +36,7 @@ func (s *webChatMessageStoreService) SaveMessage(ctx context.Context, input *pb.
 		return nil, nil // TODO: return error
 	}
 
-	if input.SenderType == pb.SenderType_CONTACT {
+	if input.SenderType == proto.SenderType_CONTACT {
 		contact, err := s.customerOSService.GetContactByEmail(input.Email)
 		if err != nil {
 			contactId, err = s.customerOSService.CreateContactWithEmail("openline", input.Email)
@@ -48,7 +47,7 @@ func (s *webChatMessageStoreService) SaveMessage(ctx context.Context, input *pb.
 			contactId = contact.Id
 		}
 		initiatorId = contactId
-	} else if input.SenderType == pb.SenderType_USER {
+	} else if input.SenderType == proto.SenderType_USER {
 		user, err := s.customerOSService.GetUserByEmail(input.Email)
 		if err != nil {
 			return nil, err
@@ -79,7 +78,7 @@ func (s *webChatMessageStoreService) SaveMessage(ctx context.Context, input *pb.
 		CreateDate:     time.Time{},
 	}
 
-	if input.GetDirection() == pb.MessageDirection_INBOUND {
+	if input.GetDirection() == proto.MessageDirection_INBOUND {
 		conversationEvent.SenderId = contactId
 		conversationEvent.SenderType = entity.CONTACT
 	} else {
@@ -105,22 +104,22 @@ func (s *webChatMessageStoreService) SaveMessage(ctx context.Context, input *pb.
 	return nil, nil
 }
 
-func convertSenderTypeToConversationSenderType(senderType pb.SenderType) entity.SenderType {
+func convertSenderTypeToConversationSenderType(senderType proto.SenderType) entity.SenderType {
 	switch senderType {
-	case pb.SenderType_CONTACT:
+	case proto.SenderType_CONTACT:
 		return entity.CONTACT
-	case pb.SenderType_USER:
+	case proto.SenderType_USER:
 		return entity.USER
 	default:
 		return entity.CONTACT
 	}
 }
 
-func encodeConversationEventDirection(direction pb.MessageDirection) entity.Direction {
+func encodeConversationEventDirection(direction proto.MessageDirection) entity.Direction {
 	switch direction {
-	case pb.MessageDirection_INBOUND:
+	case proto.MessageDirection_INBOUND:
 		return entity.INBOUND
-	case pb.MessageDirection_OUTBOUND:
+	case proto.MessageDirection_OUTBOUND:
 		return entity.OUTBOUND
 	default:
 		return entity.OUTBOUND
