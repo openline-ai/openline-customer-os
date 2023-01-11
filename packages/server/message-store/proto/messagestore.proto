@@ -1,11 +1,10 @@
 syntax = "proto3";
 package proto;
 
-option go_package = "github.com/openline-ai/openline-customer-os/packages/server/message-store/gen/proto/";
-
 import "google/protobuf/timestamp.proto";
 import "Message.proto";
 
+option go_package = "github.com/openline-ai/openline-customer-os/packages/server/message-store/gen/proto/";
 
 enum FeedItemState {
   NEW = 0;
