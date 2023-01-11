@@ -28,8 +28,6 @@ func (s *webChatMessageStoreService) SaveMessage(ctx context.Context, input *pro
 	//var conversation *gen.Conversation
 	//
 	var conversationId string
-	var contactId string
-	var userId string
 	var participantId string
 
 	if input.ConversationId == nil && input.Email == nil {
@@ -63,10 +61,8 @@ func (s *webChatMessageStoreService) SaveMessage(ctx context.Context, input *pro
 		user, err := s.customerOSService.GetUserByEmail(*input.Email)
 		if err != nil {
 			return nil, err
-		} else {
-			userId = user.Id
 		}
-		participantId = userId
+		participantId = user.Id
 	}
 
 	if conversationId == "" {
@@ -86,6 +82,7 @@ func (s *webChatMessageStoreService) SaveMessage(ctx context.Context, input *pro
 		TenantId:       tenant,
 		ConversationId: conversationId,
 		Type:           entity.WEB_CHAT,
+		Subtype:        encodeConversationEventSubtype(input.Type),
 		Content:        *input.Message,
 		Source:         entity.OPENLINE,
 		Direction:      encodeConversationEventDirection(input.Direction),
@@ -93,10 +90,10 @@ func (s *webChatMessageStoreService) SaveMessage(ctx context.Context, input *pro
 	}
 
 	if input.GetDirection() == proto.MessageDirection_INBOUND {
-		conversationEvent.SenderId = contactId
+		conversationEvent.SenderId = participantId
 		conversationEvent.SenderType = entity.CONTACT
 	} else {
-		conversationEvent.SenderId = userId
+		conversationEvent.SenderId = participantId
 		conversationEvent.SenderType = entity.USER
 	}
 
@@ -180,6 +177,17 @@ func encodeConversationEventDirection(direction proto.MessageDirection) entity.D
 		return entity.OUTBOUND
 	default:
 		return entity.OUTBOUND
+	}
+}
+
+func encodeConversationEventSubtype(messageType proto.MessageType) entity.EventSubtype {
+	switch messageType {
+	case proto.MessageType_FILE:
+		return entity.FILE
+	case proto.MessageType_MESSAGE:
+		return entity.TEXT
+	default:
+		return entity.TEXT
 	}
 }
 
