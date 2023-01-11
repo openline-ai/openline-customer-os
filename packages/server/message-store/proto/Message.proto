@@ -25,7 +25,7 @@ enum MessageChannel {
 
 message Message {
   string id = 1;
-  string feedId = 2;
+  string conversationId = 2;
   MessageType type = 3;
   string message = 4;
   MessageChannel channel = 5;

@@ -7,6 +7,7 @@ import (
 	"github.com/openline-ai/openline-customer-os/packages/server/message-store/generated/proto"
 	"github.com/openline-ai/openline-customer-os/packages/server/message-store/repository"
 	"github.com/openline-ai/openline-customer-os/packages/server/message-store/repository/entity"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 )
 
@@ -62,6 +63,22 @@ func (s *webChatMessageStoreService) SaveMessage(ctx context.Context, input *pro
 			contactId = contact.Id
 		}
 		participantId = contactId
+
+		if conversationId == "" {
+			convId, err := s.customerOSService.GetWebChatConversationIdWithContactInitiator(tenant, contactId)
+			if err != nil {
+				return nil, err
+			}
+			if convId != "" {
+				conversationId = convId
+			} else {
+				convId, err = s.customerOSService.CreateConversation(tenant, participantId, convertSenderTypeToConversationSenderType(input.SenderType), entity.WEB_CHAT)
+				if err != nil {
+					return nil, err
+				}
+				conversationId = convId
+			}
+		}
 	} else if input.SenderType == proto.SenderType_USER {
 		user, err := s.customerOSService.GetUserByEmail(*input.Email)
 		if err != nil {
@@ -70,19 +87,27 @@ func (s *webChatMessageStoreService) SaveMessage(ctx context.Context, input *pro
 			userId = user.Id
 		}
 		participantId = userId
+
+		if conversationId == "" {
+			convId, err := s.customerOSService.GetWebChatConversationIdWithContactInitiator(tenant, userId)
+			if err != nil {
+				return nil, err
+			}
+			if convId != "" {
+				conversationId = convId
+			} else {
+				convId, err = s.customerOSService.CreateConversation(tenant, userId, convertSenderTypeToConversationSenderType(input.SenderType), entity.WEB_CHAT)
+				if err != nil {
+					return nil, err
+				}
+				conversationId = convId
+			}
+		}
 	}
 
-	if conversationId == "" {
-		convId, err := s.customerOSService.CreateConversation(tenant, participantId, convertSenderTypeToConversationSenderType(input.SenderType), entity.WEB_CHAT)
-		if err != nil {
-			return nil, err
-		}
-		conversationId = convId
-	} else {
-		_, err := s.customerOSService.UpdateConversation(tenant, conversationId, participantId, convertSenderTypeToConversationSenderType(input.SenderType))
-		if err != nil {
-			return nil, err
-		}
+	_, err := s.customerOSService.UpdateConversation(tenant, conversationId, participantId, convertSenderTypeToConversationSenderType(input.SenderType))
+	if err != nil {
+		return nil, err
 	}
 
 	conversationEvent := entity.ConversationEvent{
@@ -105,20 +130,18 @@ func (s *webChatMessageStoreService) SaveMessage(ctx context.Context, input *pro
 
 	s.postgresRepositories.ConversationEventRepository.Save(&conversationEvent)
 
-	//id := int64(conversationEvent.ID)
-	//mi := &proto.Message{
-	//	Id:        id,
-	//	FeedId:    &conversationid,
-	//	Type:      pb.MessageType_MESSAGE,
-	//	Message:   conversationItem.Message,
-	//	Direction: decodeDirection(conversationItem.Direction),
-	//	Channel:   decodeChannel(conversationItem.Channel),
-	//	Username:  message.Username,
-	//	UserId:    userId,
-	//	ContactId: contactId,
-	//	Time:      timestamppb.New(now),
-	//}
-	return nil, nil
+	mi := &proto.Message{
+		Id:             conversationEvent.ID,
+		ConversationId: conversationId,
+		Type:           input.Type,
+		Message:        *input.Message,
+		Direction:      input.Direction,
+		Channel:        proto.MessageChannel_WEB_CHAT,
+		SenderType:     input.SenderType,
+		SenderId:       participantId,
+		Time:           timestamppb.New(time.Now()),
+	}
+	return mi, nil
 }
 
 func convertSenderTypeToConversationSenderType(senderType proto.SenderType) entity.SenderType {

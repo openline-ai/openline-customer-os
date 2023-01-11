@@ -29,8 +29,11 @@ type CustomerOSService interface {
 	CreateContactWithEmail(tenant string, email string) (string, error)
 	CreateContactWithPhone(phone string) (string, error)
 
-	GetWebChatConversationIdWithContactInitiator(contactId string) (string, error)
 	ConversationByIdExists(tenant string, conversationId string) (bool, error)
+
+	GetWebChatConversationIdWithContactInitiator(tenant string, contactId string) (string, error)
+	GetWebChatConversationIdWithUserInitiator(tenant string, userId string) (string, error)
+
 	CreateConversation(tenant string, initiatorId string, initiatorType entity.SenderType, channel entity.EventType) (string, error)
 	UpdateConversation(tenant string, conversationId string, participantId string, participantType entity.SenderType) (string, error)
 }
@@ -218,11 +221,6 @@ func (s *customerOSService) CreateContactWithEmail(tenant string, email string) 
 	}
 }
 
-// TODO
-func (s *customerOSService) GetWebChatConversationIdWithContactInitiator(contactId string) (string, error) {
-	return "", nil
-}
-
 func (s *customerOSService) CreateContactWithPhone(phone string) (string, error) {
 	//graphqlRequest := graphql.NewRequest(`
 	//	mutation CreateContact ($firstName: String!, $lastName: String!, $e164: String!) {
@@ -276,6 +274,70 @@ func (s *customerOSService) ConversationByIdExists(tenant string, conversationId
 	}
 
 	return true, nil
+}
+
+func (s *customerOSService) GetWebChatConversationIdWithContactInitiator(tenant string, contactId string) (string, error) {
+	session := (*s.driver).NewSession(
+		neo4j.SessionConfig{
+			AccessMode: neo4j.AccessModeWrite,
+			BoltLogger: neo4j.ConsoleBoltLogger()})
+	defer session.Close()
+
+	conversationId, err := session.ReadTransaction(func(tx neo4j.Transaction) (any, error) {
+		if queryResult, err := tx.Run(`match(o:Conversation{status:"ACTIVE", channel: "WEB_CHAT"})<-[:INITIATED]-(c:Contact{id:$contactId})-[:CONTACT_BELONGS_TO_TENANT]->(t:Tenant{name:$tenant}) return o`,
+			map[string]any{
+				"tenant":    tenant,
+				"contactId": contactId,
+			}); err != nil {
+			return nil, err
+		} else {
+			record, err := queryResult.Single()
+
+			if record == nil {
+				return "", nil
+			}
+
+			return utils.GetPropsFromNode(record.Values[0].(dbtype.Node))["id"].(string), err
+		}
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	return conversationId.(string), nil
+}
+
+func (s *customerOSService) GetWebChatConversationIdWithUserInitiator(tenant string, userId string) (string, error) {
+	session := (*s.driver).NewSession(
+		neo4j.SessionConfig{
+			AccessMode: neo4j.AccessModeWrite,
+			BoltLogger: neo4j.ConsoleBoltLogger()})
+	defer session.Close()
+
+	conversationId, err := session.ReadTransaction(func(tx neo4j.Transaction) (any, error) {
+		if queryResult, err := tx.Run(`match(o:Conversation{status:"ACTIVE", channel: "WEB_CHAT"})<-[:INITIATED]-(u:User{id:$userId})-[:USER_BELONGS_TO_TENANT]->(t:Tenant{name:$tenant}) return o`,
+			map[string]any{
+				"tenant": tenant,
+				"userId": userId,
+			}); err != nil {
+			return nil, err
+		} else {
+			record, err := queryResult.Single()
+
+			if record == nil {
+				return "", nil
+			}
+
+			return utils.GetPropsFromNode(record.Values[0].(dbtype.Node))["id"].(string), err
+		}
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	return conversationId.(string), nil
 }
 
 func (s *customerOSService) CreateConversation(tenant string, initiatorId string, initiatorType entity.SenderType, channel entity.EventType) (string, error) {
