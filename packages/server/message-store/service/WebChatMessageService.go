@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/openline-ai/openline-customer-os/packages/server/message-store/generated/proto"
 	"github.com/openline-ai/openline-customer-os/packages/server/message-store/repository"
@@ -25,51 +26,67 @@ func (s *webChatMessageStoreService) SaveMessage(ctx context.Context, input *pro
 	//var err error
 	//var conversation *gen.Conversation
 	//
+	var conversationId string
 	var contactId string
 	var userId string
-	var initiatorId string
+	var participantId string
 
-	if input.Email == "" {
-		return nil, nil // TODO: return error
+	if input.ConversationId == nil && input.Email == nil {
+		return nil, errors.New("conversationId or email must be provided")
 	}
 	if input.Message == nil && input.Bytes == nil {
-		return nil, nil // TODO: return error
+		return nil, errors.New("message or bytes must be provided")
+	}
+
+	tenant := "openline" //TODO get tenant from context
+
+	if input.ConversationId != nil {
+		exists, err := s.customerOSService.ConversationByIdExists(tenant, *input.ConversationId)
+		if err != nil {
+			return nil, err
+		}
+		if !exists {
+			return nil, errors.New("conversation not found")
+		}
+		conversationId = *input.ConversationId
 	}
 
 	if input.SenderType == proto.SenderType_CONTACT {
-		contact, err := s.customerOSService.GetContactByEmail(input.Email)
+		contact, err := s.customerOSService.GetContactByEmail(*input.Email)
 		if err != nil {
-			contactId, err = s.customerOSService.CreateContactWithEmail("openline", input.Email)
+			contactId, err = s.customerOSService.CreateContactWithEmail(tenant, *input.Email)
 			if err != nil {
 				return nil, err
 			}
 		} else {
 			contactId = contact.Id
 		}
-		initiatorId = contactId
+		participantId = contactId
 	} else if input.SenderType == proto.SenderType_USER {
-		user, err := s.customerOSService.GetUserByEmail(input.Email)
+		user, err := s.customerOSService.GetUserByEmail(*input.Email)
 		if err != nil {
 			return nil, err
 		} else {
 			userId = user.Id
 		}
-		initiatorId = userId
+		participantId = userId
 	}
 
-	//todo
-	//conversationId, err := s.customerOSService.GetWebChatConversationIdWithContactInitiator(contactId)
-	//if err != nil {
-
-	//todo
-	conversationId, err := s.customerOSService.CreateConversation("openline", initiatorId, convertSenderTypeToConversationSenderType(input.SenderType), entity.WEB_CHAT)
-	if err != nil {
-		return nil, err
+	if conversationId == "" {
+		convId, err := s.customerOSService.CreateConversation(tenant, participantId, convertSenderTypeToConversationSenderType(input.SenderType), entity.WEB_CHAT)
+		if err != nil {
+			return nil, err
+		}
+		conversationId = convId
+	} else {
+		_, err := s.customerOSService.UpdateConversation(tenant, conversationId, participantId, convertSenderTypeToConversationSenderType(input.SenderType))
+		if err != nil {
+			return nil, err
+		}
 	}
-	//}
 
 	conversationEvent := entity.ConversationEvent{
-		TenantId:       "openline", //todo
+		TenantId:       tenant,
 		ConversationId: conversationId,
 		Type:           entity.WEB_CHAT,
 		Content:        *input.Message,
@@ -89,7 +106,7 @@ func (s *webChatMessageStoreService) SaveMessage(ctx context.Context, input *pro
 	s.postgresRepositories.ConversationEventRepository.Save(&conversationEvent)
 
 	//id := int64(conversationEvent.ID)
-	//mi := &pb.Message{
+	//mi := &proto.Message{
 	//	Id:        id,
 	//	FeedId:    &conversationid,
 	//	Type:      pb.MessageType_MESSAGE,

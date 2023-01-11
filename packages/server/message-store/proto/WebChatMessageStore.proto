@@ -7,7 +7,7 @@ option go_package = "github.com/openline-ai/openline-customer-os/packages/server
 
 message WebChatInputMessage {
   optional string conversationId = 1;
-  string email = 2;
+  optional string email = 2;
   SenderType senderType = 3;
   MessageType type = 4;
   optional string message = 5;

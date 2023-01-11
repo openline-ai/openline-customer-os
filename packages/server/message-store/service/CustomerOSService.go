@@ -24,14 +24,15 @@ type CustomerOSService interface {
 	ContactByPhoneExists(e164 string) (bool, error)
 
 	GetUserByEmail(email string) (*UserInfo, error)
-	GetContactById(contactId string) (*ContactInfo, error)
 	GetContactByEmail(email string) (*ContactInfo, error)
 
-	CreateContactWithEmail(email string) (string, error)
+	CreateContactWithEmail(tenant string, email string) (string, error)
 	CreateContactWithPhone(phone string) (string, error)
 
 	GetWebChatConversationIdWithContactInitiator(contactId string) (string, error)
-	CreateConversation(tenant string, initiatorId string, initiatorType entity.SenderType, channel string) (string, error)
+	ConversationByIdExists(tenant string, conversationId string) (bool, error)
+	CreateConversation(tenant string, initiatorId string, initiatorType entity.SenderType, channel entity.EventType) (string, error)
+	UpdateConversation(tenant string, conversationId string, participantId string, participantType entity.SenderType) (string, error)
 }
 
 type UserInfo struct {
@@ -123,42 +124,6 @@ func (s *customerOSService) GetUserByEmail(email string) (*UserInfo, error) {
 	return &userInfo, nil
 }
 
-func (s *customerOSService) GetContactById(contactId string) (*ContactInfo, error) {
-
-	//graphqlRequest := graphql.NewRequest(`
-	//			query ($id: ID!) {
-	//				contact(id: $id){
-	//					firstName,
-	//					lastName,
-	//					id,
-	//					phoneNumbers {
-	//					   e164
-	//					 }, emails {
-	//					   email
-	//					 }
-	//  				}
-	//			}
-	//`)
-	//
-	//graphqlRequest.Var("id", id)
-	//graphqlRequest.Header.Add("X-Openline-API-KEY", s.config.Service.CustomerOsAPIKey)
-	//var graphqlResponse contactResponse
-	//if err := s.graphqlClient.Run(context.Background(), graphqlRequest, &graphqlResponse); err != nil {
-	//	log.Printf("Grapql got error %s", err.Error())
-	//	return nil, err
-	//}
-	//contactInfo := &ContactInfo{firstName: graphqlResponse.Contact.FirstName,
-	//	lastName: graphqlResponse.Contact.LastName,
-	//	id:       graphqlResponse.Contact.ID}
-	//if len(graphqlResponse.Contact.Emails) > 0 {
-	//	contactInfo.email = &graphqlResponse.Contact.Emails[0].Email
-	//}
-	//if len(graphqlResponse.Contact.PhoneNumbers) > 0 {
-	//	contactInfo.phone = &graphqlResponse.Contact.PhoneNumbers[0].E164
-	//}
-	return nil, nil
-}
-
 func (s *customerOSService) GetContactByEmail(email string) (*ContactInfo, error) {
 	session := (*s.driver).NewSession(
 		neo4j.SessionConfig{
@@ -205,13 +170,17 @@ func (s *customerOSService) CreateContactWithEmail(tenant string, email string) 
 		contactQuery := "MATCH (t:Tenant {name:$tenant}) " +
 			" MERGE (c:Contact {id:randomUUID()})-[:CONTACT_BELONGS_TO_TENANT]->(t) ON CREATE SET" +
 			" c.createdAt=$createdAt, " +
+			" c.source=$source, " +
+			" c.sourceOfTruth=$sourceOfTruth, " +
 			" c:%s " +
 			" RETURN c"
 
 		contactQueryResult, err := tx.Run(fmt.Sprintf(contactQuery, "Contact_"+tenant),
 			map[string]interface{}{
-				"tenant":    tenant,
-				"createdAt": time.Now().UTC(),
+				"tenant":        tenant,
+				"createdAt":     time.Now().UTC(),
+				"source":        "openline",
+				"sourceOfTruth": "openline",
 			})
 
 		node, err := utils.ExtractSingleRecordFirstValueAsNode(contactQueryResult, err)
@@ -226,7 +195,7 @@ func (s *customerOSService) CreateContactWithEmail(tenant string, email string) 
 			" ON MATCH SET e.label=$label, r.primary=$primary " +
 			" RETURN e, r"
 
-		contactId := fmt.Sprintf("%d", node.Id)
+		contactId := utils.GetPropsFromNode(*node)["id"].(string)
 		_, err = tx.Run(fmt.Sprintf(emailQuery, "Email_"+tenant),
 			map[string]interface{}{
 				"tenant":    tenant,
@@ -251,24 +220,6 @@ func (s *customerOSService) CreateContactWithEmail(tenant string, email string) 
 
 // TODO
 func (s *customerOSService) GetWebChatConversationIdWithContactInitiator(contactId string) (string, error) {
-	//graphqlRequest := graphql.NewRequest(`
-	//	//mutation CreateContact ($firstName: String!, $lastName: String!, $e164: String!) {
-	//	//  contact_Create(input: {
-	//    //    firstName: $firstName,
-	//	//	lastName: $lastName,
-	//	//    phoneNumber:{e164:  $e164, label: WORK}
-	//	//  }) {
-	//	//	  id
-	//	//  }
-	//	//}
-	//`)
-	//
-	//graphqlRequest.Header.Add("X-Openline-API-KEY", s.config.Service.CustomerOsAPIKey)
-	//var graphqlResponse map[string]map[string]string
-	//if err := s.graphqlClient.Run(context.Background(), graphqlRequest, &graphqlResponse); err != nil {
-	//	return "", err
-	//}
-	//return graphqlResponse["contact_Create"]["id"], nil
 	return "", nil
 }
 
@@ -297,6 +248,36 @@ func (s *customerOSService) CreateContactWithPhone(phone string) (string, error)
 	return "", nil
 }
 
+func (s *customerOSService) ConversationByIdExists(tenant string, conversationId string) (bool, error) {
+	session := (*s.driver).NewSession(
+		neo4j.SessionConfig{
+			AccessMode: neo4j.AccessModeWrite,
+			BoltLogger: neo4j.ConsoleBoltLogger()})
+	defer session.Close()
+
+	dbRecords, err := session.ReadTransaction(func(tx neo4j.Transaction) (any, error) {
+		if queryResult, err := tx.Run(`MATCH (c:Conversation {id:$conversationId}) RETURN c`, //TODO need to filter by tenant
+			map[string]any{
+				"tenant":         tenant,
+				"conversationId": conversationId,
+			}); err != nil {
+			return nil, err
+		} else {
+			return queryResult.Collect()
+		}
+	})
+
+	if err != nil {
+		return false, err
+	}
+
+	if len(dbRecords.([]*db.Record)) == 0 {
+		return false, nil
+	}
+
+	return true, nil
+}
+
 func (s *customerOSService) CreateConversation(tenant string, initiatorId string, initiatorType entity.SenderType, channel entity.EventType) (string, error) {
 	session := (*s.driver).NewSession(
 		neo4j.SessionConfig{
@@ -323,13 +304,19 @@ func (s *customerOSService) CreateConversation(tenant string, initiatorId string
 		if len(contactIds) > 0 {
 			queryLinkWithContacts = " WITH DISTINCT t, o " +
 				" OPTIONAL MATCH (c:Contact)-[:CONTACT_BELONGS_TO_TENANT]->(t) WHERE c.id in $contactIds " +
-				" MERGE (c)-[:PARTICIPATES]->(o) "
+				" MERGE (c)-[:PARTICIPATES]->(o) " +
+				" WITH DISTINCT t, o " +
+				" OPTIONAL MATCH (c:Contact)-[:CONTACT_BELONGS_TO_TENANT]->(t) WHERE c.id in $contactIds " +
+				" MERGE (c)-[:INITIATED]->(o) "
 		}
 		queryLinkWithUsers := ""
 		if len(userIds) > 0 {
 			queryLinkWithUsers = " WITH DISTINCT t, o " +
 				" OPTIONAL MATCH (u:User)-[:USER_BELONGS_TO_TENANT]->(t) WHERE u.id in $userIds " +
-				" MERGE (u)-[:PARTICIPATES]->(o) "
+				" MERGE (u)-[:PARTICIPATES]->(o) " +
+				" WITH DISTINCT t, o " +
+				" OPTIONAL MATCH (u:User)-[:USER_BELONGS_TO_TENANT]->(t) WHERE u.id in $userIds " +
+				" MERGE (u)-[:INITIATED]->(o) "
 		}
 		queryResult, err := tx.Run(fmt.Sprintf(query, "Conversation_"+tenant, queryLinkWithContacts, queryLinkWithUsers),
 			map[string]interface{}{
@@ -345,7 +332,57 @@ func (s *customerOSService) CreateConversation(tenant string, initiatorId string
 		return "", err
 	} else {
 		dbNode := result.(*dbtype.Node)
-		return fmt.Sprintf("%d", dbNode.Id), err
+		return utils.GetPropsFromNode(*dbNode)["id"].(string), err
+	}
+}
+
+func (s *customerOSService) UpdateConversation(tenant string, conversationId string, participantId string, participantType entity.SenderType) (string, error) {
+	session := (*s.driver).NewSession(
+		neo4j.SessionConfig{
+			AccessMode: neo4j.AccessModeWrite,
+			BoltLogger: neo4j.ConsoleBoltLogger()})
+	defer session.Close()
+
+	contactIds := []string{}
+	userIds := []string{}
+
+	if participantType == entity.CONTACT {
+		contactIds = append(contactIds, participantId)
+	} else if participantType == entity.USER {
+		userIds = append(userIds, participantId)
+	}
+
+	if result, err := session.WriteTransaction(func(tx neo4j.Transaction) (any, error) {
+		query := "MATCH (t:Tenant {name:$tenant}) " +
+			" MERGE (o:Conversation {id:$conversationId}) " +
+			" ON MATCH SET o.messageCount=o.messageCount+1, o:%s " +
+			" %s %s " +
+			" RETURN DISTINCT o"
+		queryLinkWithContacts := ""
+		if len(contactIds) > 0 {
+			queryLinkWithContacts = " WITH DISTINCT t, o " +
+				" OPTIONAL MATCH (c:Contact)-[:CONTACT_BELONGS_TO_TENANT]->(t) WHERE c.id in $contactIds " +
+				" MERGE (c)-[:PARTICIPATES]->(o) "
+		}
+		queryLinkWithUsers := ""
+		if len(userIds) > 0 {
+			queryLinkWithUsers = " WITH DISTINCT t, o " +
+				" OPTIONAL MATCH (u:User)-[:USER_BELONGS_TO_TENANT]->(t) WHERE u.id in $userIds " +
+				" MERGE (u)-[:PARTICIPATES]->(o) "
+		}
+		queryResult, err := tx.Run(fmt.Sprintf(query, "Conversation_"+tenant, queryLinkWithContacts, queryLinkWithUsers),
+			map[string]interface{}{
+				"tenant":         tenant,
+				"conversationId": conversationId,
+				"contactIds":     contactIds,
+				"userIds":        userIds,
+			})
+		return utils.ExtractSingleRecordFirstValueAsNode(queryResult, err)
+	}); err != nil {
+		return "", err
+	} else {
+		dbNode := result.(*dbtype.Node)
+		return utils.GetPropsFromNode(*dbNode)["id"].(string), err
 	}
 }
 
