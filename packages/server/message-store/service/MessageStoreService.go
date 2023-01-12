@@ -3,12 +3,12 @@ package service
 import (
 	"context"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
-	"github.com/openline-ai/openline-customer-os/packages/server/message-store/generated/proto"
+	msProto "github.com/openline-ai/openline-customer-os/packages/server/message-store/proto/generated"
 	"github.com/openline-ai/openline-customer-os/packages/server/message-store/repository"
 )
 
 type messageService struct {
-	proto.UnimplementedMessageStoreServiceServer
+	msProto.UnimplementedMessageStoreServiceServer
 	driver               *neo4j.Driver
 	postgresRepositories *repository.PostgresRepositories
 }
@@ -145,7 +145,7 @@ type messageService struct {
 //	}
 //}
 
-func (s *messageService) GetMessage(ctx context.Context, msgId *proto.Id) (*proto.Message, error) {
+func (s *messageService) GetMessage(ctx context.Context, msgId *msProto.Id) (*msProto.Message, error) {
 	//if msgId == nil || msgId.GetId() == 0 {
 	//	return nil, status.Errorf(codes.InvalidArgument, "Message ID must be specified")
 	//}
@@ -186,7 +186,7 @@ func (s *messageService) GetMessage(ctx context.Context, msgId *proto.Id) (*prot
 	return nil, nil
 }
 
-func (s *messageService) GetMessages(ctx context.Context, messagesRequest *proto.GetMessagesRequest) (*proto.MessagePagedResponse, error) {
+func (s *messageService) GetMessages(ctx context.Context, messagesRequest *msProto.GetMessagesRequest) (*msProto.MessagePagedResponse, error) {
 	//var messages []*gen.ConversationItem
 	//var err error
 	//var conversation *gen.Conversation
@@ -247,7 +247,7 @@ func (s *messageService) GetMessages(ctx context.Context, messagesRequest *proto
 	return nil, nil
 }
 
-func (s *messageService) GetFeeds(ctx context.Context, feedRequest *proto.GetFeedsPagedRequest) (*proto.FeedItemPagedResponse, error) {
+func (s *messageService) GetFeeds(ctx context.Context, feedRequest *msProto.GetFeedsPagedRequest) (*msProto.FeedItemPagedResponse, error) {
 	//query := s.client.Conversation.Query()
 	//
 	//if feedRequest.GetStateIn() != nil {
@@ -304,7 +304,7 @@ func (s *messageService) GetFeeds(ctx context.Context, feedRequest *proto.GetFee
 	return nil, nil
 }
 
-func (s *messageService) GetFeed(ctx context.Context, feedIdRequest *proto.Id) (*proto.FeedItem, error) {
+func (s *messageService) GetFeed(ctx context.Context, feedIdRequest *msProto.Id) (*msProto.FeedItem, error) {
 	//if feedIdRequest == nil || feedIdRequest.GetId() == 0 {
 	//	return nil, status.Errorf(codes.InvalidArgument, "Feed ID must be specified")
 	//}

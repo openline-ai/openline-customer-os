@@ -3,7 +3,7 @@ package proto;
 
 import "Message.proto";
 
-option go_package = "github.com/openline-ai/openline-customer-os/packages/server/message-store/generated/proto/";
+option go_package = "github.com/openline-ai/openline-customer-os/packages/server/message-store/proto/generated/";
 
 message WebChatInputMessage {
   optional string conversationId = 1;

@@ -3,7 +3,7 @@ package proto;
 
 import "google/protobuf/timestamp.proto";
 
-option go_package = "github.com/openline-ai/openline-customer-os/packages/server/message-store/generated/proto/";
+option go_package = "github.com/openline-ai/openline-customer-os/packages/server/message-store/proto/generated/";
 
 enum SenderType {
   CONTACT = 0;
@@ -21,6 +21,10 @@ enum MessageChannel {
   WEB_CHAT = 0;
   MAIL = 1;
   VOICE = 2;
+}
+
+message MessageId {
+  string id = 1;
 }
 
 message Message {

@@ -54,6 +54,26 @@ type ConversationEvent struct {
 	Source         Source       `gorm:"column:source;type:varchar(50);NOT NULL;" json:"source" binding:"required"`
 	Direction      Direction    `gorm:"column:direction;type:varchar(10);NOT NULL;" json:"direction" binding:"required"`
 	CreateDate     time.Time    `gorm:"column:created_at"`
+	OriginalJson   string       `gorm:"column:direction;type:text;NOT NULL;" json:"direction" binding:"required"`
+	//
+	//Content: {
+	//	"message": "Hello World",
+	//	"fileId": "1234"
+	//}
+	//
+	//Content: {
+	//	to: "",
+	//	from: "",
+	//	body: "",
+	//	subject: "",
+	//}
+	//
+	//Content: {
+	//	callerId: "",
+	//	calledId: "",
+	//	callerPhoneNumber: "",
+	//	calledPhoneNumber: "",
+	//}
 }
 
 func (ConversationEvent) TableName() string {
