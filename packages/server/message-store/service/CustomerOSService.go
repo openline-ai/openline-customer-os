@@ -31,6 +31,8 @@ type CustomerOSService interface {
 
 	ConversationByIdExists(tenant string, conversationId string) (bool, error)
 
+	GetConversations(tenant string) ([]Conversation, error)
+
 	GetWebChatConversationIdWithContactInitiator(tenant string, contactId string) (string, error)
 	GetWebChatConversationIdWithUserInitiator(tenant string, userId string) (string, error)
 
@@ -44,6 +46,13 @@ type UserInfo struct {
 
 type ContactInfo struct {
 	Id string
+}
+
+type Conversation struct {
+	Id        string
+	StartedAt time.Time
+	Channel   string
+	Status    string
 }
 
 func parseEmail(email string) (string, string) {
@@ -274,6 +283,42 @@ func (s *customerOSService) ConversationByIdExists(tenant string, conversationId
 	}
 
 	return true, nil
+}
+
+func (s *customerOSService) GetConversations(tenant string) ([]Conversation, error) {
+	session := (*s.driver).NewSession(
+		neo4j.SessionConfig{
+			AccessMode: neo4j.AccessModeWrite,
+			BoltLogger: neo4j.ConsoleBoltLogger()})
+	defer session.Close()
+
+	dbRecords, err := session.ReadTransaction(func(tx neo4j.Transaction) (any, error) {
+
+		if queryResult, err := tx.Run("MATCH (c:Conversation_"+tenant+") RETURN c", map[string]any{
+			"tenant": tenant,
+		}); err != nil {
+			return nil, err
+		} else {
+			return queryResult.Collect()
+		}
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	var conversations []Conversation
+	for _, v := range dbRecords.([]*neo4j.Record) {
+		node := utils.NodePtr(v.Values[0].(neo4j.Node))
+		conversation := new(Conversation)
+		conversation.Id = utils.GetPropsFromNode(*node)["id"].(string)
+		conversation.Status = utils.GetPropsFromNode(*node)["status"].(string)
+		conversation.Channel = utils.GetPropsFromNode(*node)["channel"].(string)
+		conversation.StartedAt = utils.GetPropsFromNode(*node)["startedAt"].(time.Time)
+		conversations = append(conversations, *conversation)
+	}
+
+	return conversations, nil
 }
 
 func (s *customerOSService) GetWebChatConversationIdWithContactInitiator(tenant string, contactId string) (string, error) {

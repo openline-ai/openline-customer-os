@@ -79,7 +79,7 @@ func (s *webChatMessageStoreService) SaveMessage(ctx context.Context, input *msP
 	}
 
 	conversationEvent := entity.ConversationEvent{
-		TenantId:       tenant,
+		TenantName:     tenant,
 		ConversationId: conversationId,
 		Type:           entity.WEB_CHAT,
 		Subtype:        encodeConversationEventSubtype(input.Type),
@@ -87,6 +87,8 @@ func (s *webChatMessageStoreService) SaveMessage(ctx context.Context, input *msP
 		Source:         entity.OPENLINE,
 		Direction:      encodeConversationEventDirection(input.Direction),
 		CreateDate:     time.Time{},
+
+		OriginalJson: "TODO",
 	}
 
 	if input.GetDirection() == msProto.MessageDirection_INBOUND {

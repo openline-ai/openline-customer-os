@@ -2,15 +2,20 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	msProto "github.com/openline-ai/openline-customer-os/packages/server/message-store/proto/generated"
 	"github.com/openline-ai/openline-customer-os/packages/server/message-store/repository"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
+	"log"
 )
 
 type messageService struct {
 	msProto.UnimplementedMessageStoreServiceServer
 	driver               *neo4j.Driver
 	postgresRepositories *repository.PostgresRepositories
+	customerOSService    *customerOSService
 }
 
 //func encodeConversationState(feedState pb.FeedItemState) genConversation.State {
@@ -247,8 +252,11 @@ func (s *messageService) GetMessages(ctx context.Context, messagesRequest *msPro
 	return nil, nil
 }
 
-func (s *messageService) GetFeeds(ctx context.Context, feedRequest *msProto.GetFeedsPagedRequest) (*msProto.FeedItemPagedResponse, error) {
-	//query := s.client.Conversation.Query()
+func (s *messageService) GetFeeds(ctx context.Context, request *msProto.GetFeedsPagedRequest) (*msProto.FeedItemPagedResponse, error) {
+	conversations, err := s.customerOSService.GetConversations("openline")
+	if err != nil {
+		return nil, err
+	}
 	//
 	//if feedRequest.GetStateIn() != nil {
 	//	stateIn := make([]genConversation.State, 0, len(feedRequest.GetStateIn()))
@@ -263,45 +271,38 @@ func (s *messageService) GetFeeds(ctx context.Context, feedRequest *msProto.GetF
 	//	limit = int(feedRequest.GetPageSize())
 	//}
 	//offset := limit * int(feedRequest.GetPage())
-	//
-	//conversations, err := query.Limit(limit).Offset(offset).All(ctx)
-	//count, err2 := query.Count(ctx)
-	//
-	//if err != nil || err2 != nil {
-	//	se, _ := status.FromError(err)
-	//	return nil, status.Errorf(se.Code(), "Error getting messages: %s", err.Error())
-	//}
-	//fl := &pb.FeedItemPagedResponse{FeedItems: make([]*pb.FeedItem, len(conversations))}
-	//fl.TotalElements = int32(count)
-	//
-	//for i, conversation := range conversations {
-	//	var id = int64(conversation.ID)
-	//	log.Printf("Got a conversation id of %d", id)
-	//
-	//	contactById, err := getContactById(s.graphqlClient, conversation.ContactId, s.config.Service.CustomerOsAPIKey)
-	//
-	//	if err != nil {
-	//		se, _ := status.FromError(err)
-	//		return nil, status.Errorf(se.Code(), "Error getting messages: %s", err.Error())
-	//	}
-	//
-	//	fl.FeedItems[i] = &pb.FeedItem{
-	//		Id:               int64(conversation.ID),
-	//		ContactId:        contactById.id,
-	//		ContactFirstName: contactById.firstName,
-	//		ContactLastName:  contactById.lastName,
-	//		ContactEmail:     *contactById.email,
-	//		State:            decodeConversationState(conversation.State),
-	//		LastSenderId:     conversation.LastSenderId,
-	//		LastSenderType:   decodeSenderType(conversation.LastSenderType),
-	//		Message:          conversation.LastMessage,
-	//		UpdatedOn:        timestamppb.New(conversation.UpdatedOn),
-	//	}
-	//
-	//	msg, _ := json.Marshal(fl.FeedItems[i])
-	//	log.Printf("Got a feed item of %s", msg)
-	//}
-	return nil, nil
+
+	fl := &msProto.FeedItemPagedResponse{FeedItems: make([]*msProto.FeedItem, len(conversations))}
+	fl.TotalElements = int32(len(conversations))
+
+	for i, conversation := range conversations {
+		log.Printf("Got a conversation id of %d", conversation.Id)
+
+		//contactById, err := getContactById(s.graphqlClient, conversation.ContactId, s.config.Service.CustomerOsAPIKey)
+
+		if err != nil {
+			se, _ := status.FromError(err)
+			return nil, status.Errorf(se.Code(), "Error getting messages: %s", err.Error())
+		}
+
+		fl.FeedItems[i] = &msProto.FeedItem{
+			Id:         conversation.Id,
+			SenderId:   "",
+			SenderType: "",
+			FirstName:  "",
+			LastName:   "",
+			Username:   "",
+			Email:      "",
+			Phone:      "",
+			Preview:    "",
+			UpdatedOn:  timestamppb.Now(),
+		}
+
+		msg, _ := json.Marshal(fl.FeedItems[i])
+		log.Printf("Got a feed item of %s", msg)
+	}
+
+	return fl, nil
 }
 
 func (s *messageService) GetFeed(ctx context.Context, feedIdRequest *msProto.Id) (*msProto.FeedItem, error) {
@@ -336,9 +337,10 @@ func (s *messageService) GetFeed(ctx context.Context, feedIdRequest *msProto.Id)
 	return nil, nil
 }
 
-func NewMessageService(driver *neo4j.Driver, postgresRepositories *repository.PostgresRepositories) *messageService {
+func NewMessageService(driver *neo4j.Driver, postgresRepositories *repository.PostgresRepositories, customerOSService *customerOSService) *messageService {
 	ms := new(messageService)
 	ms.driver = driver
 	ms.postgresRepositories = postgresRepositories
+	ms.customerOSService = customerOSService
 	return ms
 }

@@ -56,9 +56,9 @@ type ConversationEvent struct {
 	SenderType SenderType `gorm:"column:sender_type;type:varchar(50);NOT NULL" json:"senderType" binding:"required"`
 
 	//vezi mai jos json
-	Content    string    `gorm:"column:content;type:text;NOT NULL;" json:"content" binding:"required"`
-	Source     Source    `gorm:"column:source;type:varchar(50);NOT NULL;" json:"source" binding:"required"`
-	ExternalId time.Time `gorm:"column:external_id;type:varchar(100);" json:"externalId" binding:"required"`
+	Content    string `gorm:"column:content;type:text;NOT NULL;" json:"content" binding:"required"`
+	Source     Source `gorm:"column:source;type:varchar(50);NOT NULL;" json:"source" binding:"required"`
+	ExternalId string `gorm:"column:external_id;type:varchar(100);" json:"externalId" binding:"required"`
 
 	Direction  Direction `gorm:"column:direction;type:varchar(10);NOT NULL;" json:"direction" binding:"required"`
 	CreateDate time.Time `gorm:"column:created_at"`

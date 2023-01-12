@@ -49,7 +49,7 @@ func main() {
 	customerOSService := service.NewCustomerOSService(neo4jDriver, repositories)
 
 	// Register the Message Item service with the server.
-	msProto.RegisterMessageStoreServiceServer(server, service.NewMessageService(neo4jDriver, repositories))
+	msProto.RegisterMessageStoreServiceServer(server, service.NewMessageService(neo4jDriver, repositories, customerOSService))
 	msProto.RegisterWebChatMessageStoreServiceServer(server, service.NewWebChatMessageStoreService(neo4jDriver, repositories, customerOSService))
 
 	// Open port for listening to traffic.

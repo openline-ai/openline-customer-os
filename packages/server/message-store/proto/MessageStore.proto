@@ -19,15 +19,17 @@ message MessagePagedResponse {
 }
 
 message FeedItem {
-  int64 id = 1;
-  string contactId= 2;
-  string contactFirstName = 3;
-  string contactLastName = 4;
-  string contactEmail = 5;
-  FeedItemState state = 6;
-  string lastSenderId = 7;
-  SenderType lastSenderType = 8;
-  string message = 9;
+  string id = 1;
+  string senderId = 2;
+  string senderType = 3;
+
+  string firstName = 4;
+  string lastName = 5;
+  string username = 6;
+  string email = 7;
+  string phone = 8;
+
+  string preview = 9;
   google.protobuf.Timestamp updatedOn = 10;
 }
 message FeedItemPagedResponse {
