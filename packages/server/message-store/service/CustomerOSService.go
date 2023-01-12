@@ -359,7 +359,7 @@ func (s *customerOSService) CreateConversation(tenant string, initiatorId string
 	if result, err := session.WriteTransaction(func(tx neo4j.Transaction) (any, error) {
 		query := "MATCH (t:Tenant {name:$tenant}) " +
 			" MERGE (o:Conversation {id:randomUUID()}) " +
-			" ON CREATE SET o.startedAt=$startedAt, o.messageCount=0, o.channel=$channel, o.status=$status, o:%s " +
+			" ON CREATE SET o.startedAt=$startedAt, o.messageCount=0, o.channel=$channel, o.status=$status, o.source=$source, o.sourceOfTruth=$sourceOfTruth, o.appSource=$appSource, o:%s " +
 			" %s %s " +
 			" RETURN DISTINCT o"
 		queryLinkWithContacts := ""
@@ -382,12 +382,15 @@ func (s *customerOSService) CreateConversation(tenant string, initiatorId string
 		}
 		queryResult, err := tx.Run(fmt.Sprintf(query, "Conversation_"+tenant, queryLinkWithContacts, queryLinkWithUsers),
 			map[string]interface{}{
-				"tenant":     tenant,
-				"status":     "ACTIVE",
-				"startedAt":  time.Now().UTC(),
-				"channel":    channel,
-				"contactIds": contactIds,
-				"userIds":    userIds,
+				"tenant":        tenant,
+				"source":        "openline",
+				"sourceOfTruth": "openline",
+				"appSource":     "manual",
+				"status":        "ACTIVE",
+				"startedAt":     time.Now().UTC(),
+				"channel":       channel,
+				"contactIds":    contactIds,
+				"userIds":       userIds,
 			})
 		return utils.ExtractSingleRecordFirstValueAsNode(queryResult, err)
 	}); err != nil {
