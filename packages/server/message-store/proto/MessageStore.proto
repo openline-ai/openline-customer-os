@@ -12,12 +12,13 @@ enum FeedItemState {
   CLOSED = 2;
 }
 
-message MessagePagedResponse {
-  repeated Message message = 1;
-  optional google.protobuf.Timestamp before = 2;
-  int32 pageSize = 3;
+message MessageListResponse {
+  repeated Message messages = 1;
 }
 
+message FeedId {
+  string id = 1;
+}
 message FeedItem {
   string id = 1;
   string senderId = 2;
@@ -37,16 +38,6 @@ message FeedItemPagedResponse {
   int32 totalElements = 2;
 }
 
-message Id {
-  int64 id = 1;
-}
-
-message GetMessagesRequest {
-  int64 conversationId = 1;
-  optional google.protobuf.Timestamp before = 2;
-  int32 pageSize = 3;
-}
-
 message GetFeedsPagedRequest {
   repeated FeedItemState stateIn = 1;
   int32 page = 2;
@@ -54,9 +45,9 @@ message GetFeedsPagedRequest {
 }
 
 service MessageStoreService {
-  rpc saveMessage(Message) returns (Message) {};
-  rpc getMessages(GetMessagesRequest) returns (MessagePagedResponse) {};
-  rpc getMessage(Id) returns (Message) {};
   rpc getFeeds(GetFeedsPagedRequest) returns (FeedItemPagedResponse) {};
-  rpc getFeed(Id) returns (FeedItem) {};
+  rpc getFeed(FeedId) returns (FeedItem) {};
+
+  rpc getMessagesForFeed(FeedId) returns (MessageListResponse) {};
+  rpc getMessage(MessageId) returns (Message) {};
 }

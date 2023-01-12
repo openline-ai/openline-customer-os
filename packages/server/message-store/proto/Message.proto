@@ -9,7 +9,7 @@ enum SenderType {
   CONTACT = 0;
   USER = 1;
 }
-enum MessageType {
+enum MessageSubtype {
   MESSAGE = 0;
   FILE = 1;
 }
@@ -17,9 +17,9 @@ enum MessageDirection {
   INBOUND = 0;
   OUTBOUND = 1;
 }
-enum MessageChannel {
+enum MessageType {
   WEB_CHAT = 0;
-  MAIL = 1;
+  EMAIL = 1;
   VOICE = 2;
 }
 
@@ -30,12 +30,14 @@ message MessageId {
 message Message {
   string id = 1;
   string conversationId = 2;
-  MessageType type = 3;
-  string message = 4;
-  MessageChannel channel = 5;
-  MessageDirection direction = 6;
-  google.protobuf.Timestamp time = 7;
+  string conversationInitiatorUsername = 3;
+  MessageType type = 4;
+  MessageSubtype subtype = 5;
+  string content = 6;
+  MessageDirection direction = 7;
+  google.protobuf.Timestamp time = 8;
 
-  SenderType senderType = 8;
-  string senderId = 9;
+  SenderType senderType = 9;
+  string senderId = 10;
+  string senderUsername = 11;
 }
