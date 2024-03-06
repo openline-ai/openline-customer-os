@@ -415,10 +415,7 @@ func (h *InvoiceEventHandler) fillOffCyclePrepaidInvoice(ctx context.Context, te
 
 func isMonthlyAnniversary(date time.Time) bool {
 	now := utils.Now()
-	if now.Day() == date.Day() {
-		return true
-	}
-	return false
+	return now.Day() == date.Day()
 }
 
 func calculatePriceForBilledType(price float64, billed neo4jenum.BilledType, cycle neo4jenum.BillingCycle) float64 {
@@ -789,8 +786,17 @@ func (h *InvoiceEventHandler) dispatchInvoiceFinalizedEvent(ctx context.Context,
 
 	webhookPayload := webhook.PopulateInvoiceFinalizedPayload(&invoice, &organizationEntity, &contractEntity, ilEntities)
 
+	notifyFailure := true
 	// dispatch the event
-	err = webhook.DispatchWebhook(tenant, webhook.WebhookEventInvoiceFinalized, webhookPayload, h.repositories, h.cfg)
+	err = webhook.DispatchWebhook(
+		tenant,
+		webhook.WebhookEventInvoiceFinalized,
+		webhookPayload,
+		h.repositories,
+		h.cfg,
+		h.cfg.Services.Novu.ApiKey,
+		notifyFailure,
+	)
 	if err != nil {
 		tracing.TraceErr(span, err)
 		h.log.Errorf("Error dispatching invoice finalized event for invoice %s: %s", invoice.Id, err.Error())

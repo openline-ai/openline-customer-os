@@ -6,9 +6,21 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/openline-ai/openline-customer-os/packages/server/customer-os-common-module/notifications"
+	"go.temporal.io/sdk/activity"
 )
 
-func WebhookActivity(ctx context.Context, targetUrl, authHeaderName, authHeaderValue string, reqBody string) error {
+func WebhookActivity(ctx context.Context, targetUrl, authHeaderName, authHeaderValue string, reqBody string, notifyFailure bool, notification *notifications.NovuNotification, apiKey string, retryLimit int32) error {
+	// after 7 attempts, this wraps up notifying user
+	defer func() {
+		if notifyFailure && activity.GetInfo(ctx).Attempt >= retryLimit {
+			err := NotifyUserActivity(notification, apiKey)
+			if err != nil {
+				fmt.Println("Error notifying user:", err)
+			}
+		}
+	}()
 	var data map[string]interface{}
 
 	// Unmarshal the JSON string into a map
